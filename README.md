@@ -1,1 +1,3 @@
-My Arch Linux Hyprland Setup
+# My Arch Linux Hyprland Setup
+
+![preview](preview.png)
