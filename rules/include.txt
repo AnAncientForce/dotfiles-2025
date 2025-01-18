@@ -1,0 +1,9 @@
+/home/Z/.librewolf
+/home/Z/Library/apps
+/home/Z/Library/dev
+/home/Z/Library/documents
+/home/Z/Library/pictures
+/home/Z/Library/scripts
+/home/Z/Library/videos
+/home/Z/Library/wallpapers
+/home/Z/Library/recovery
