@@ -5,6 +5,7 @@ deemix
 emote
 flatseal
 gpu-usage-waybar-git
+grimblast-git
 hyprshot
 hyprsunset-git
 jdownloader2
