@@ -32,8 +32,14 @@ fi
 for arg in "$@"; do
     case "$arg" in
     setup)
-        sudo pacman -S --noconfirm - < packages/pacman.txt
-        yay -S --noconfirm - < packages/aur.txt
+        sudo pacman -S --needed base-devel git
+        git clone https://aur.archlinux.org/yay.git
+        cd yay
+        makepkg -si
+        yay --version
+        cd ~
+        sudo pacman -S --noconfirm - <packages/pacman.txt
+        yay -S --noconfirm - <packages/aur.txt
         sudo systemctl enable --now swayosd-libinput-backend.service
         sudo systemctl enable libvirtd
         sudo systemctl start libvirtd
@@ -48,7 +54,7 @@ for arg in "$@"; do
         valid_flag=true
         ;;
     change-bg)
-        WALLPAPER_DIRECTORY=~/Library/pictures/backgrounds
+        WALLPAPER_DIRECTORY=~/Library/hyprpaper
         WALLPAPER=$(find "$WALLPAPER_DIRECTORY" -type f | shuf -n 1)
 
         hyprctl hyprpaper preload "$WALLPAPER"
@@ -63,32 +69,33 @@ for arg in "$@"; do
         wal -i "$WALLPAPER"
         valid_flag=true
         ;;
-    backup)
+    bk)
         repo=~/Library/dev/archlinux/dotfiles-2025
 
         cd $repo
 
-        rm -rf $repo/{.config,scripts,rules,packages}
+        rm -rf $repo/{.config,scripts,packages,local}
 
-        mkdir -p .config scripts rules packages
+        mkdir -p .config scripts scripts/packages .local/share
 
-        cp -r ~/.config/hypr                $repo/.config
-        cp -r ~/.config/nwg-panel           $repo/.config
-        cp -r ~/.config/nwg-dock-hyprland   $repo/.config
-        cp -r ~/.config/kitty               $repo/.config
+        cp -r ~/.config/hypr $repo/.config
+        cp -r ~/.config/waybar $repo/.config
+        cp -r ~/.config/kitty $repo/.config
+        cp -r ~/.config/vkBasalt $repo/.config
+        cp -r ~/.config/easyeffects $repo/.config
 
-        cp -r ~/Library/scripts/rules       $repo
+        cp -r ~/.local/share/reshade $repo/.local/share
 
-        cp -r ~/Library/scripts/cmd.sh      $repo/scripts
+        cp -r ~/Library/scripts/cmd.sh $repo/scripts
 
-        pacman -Qqen > packages/pacman.txt
-        pacman -Qqem > packages/aur.txt
+        pacman -Qqen >$repo/scripts/packages/pacman.txt
+        pacman -Qqem >$repo/scripts/packages/aur.txt
 
         date=$(date +%Y.%m.%d-%H.%M.%S)
         read -p "Create $date backup?
         (y/n): " choice
         if [ "$choice" = "y" ]; then
-            tar -czf "/run/media/Z/My Passport/Library/Backups/archlinux/$date.tar.gz" -T ~/Library/scripts/rules/include.txt
+            tar -czf "/run/media/Z/My Passport/Library/Backups/archlinux/$date.tar.gz" -T ~/Library/scripts/include.txt
         fi
         valid_flag=true
         ;;
@@ -112,10 +119,28 @@ for arg in "$@"; do
         python main.py
         valid_flag=true
         ;;
+    open-webui)
+        source activate base
+        conda activate openenv
+        open-webui serve
+        valid_flag=true
+        ;;
     kh)
         URL="$2"
-        cd ~/Library/Apps/khinsider/
-        python khinsider.py --format flac '$URL'
+        cd ~/Library/apps/khinsider/
+        python khinsider.py --format flac "$URL"
+        # --format flac
+        cd ~
+        valid_flag=true
+        ;;
+    kh-batch)
+        URL="$2"
+        cd ~/Library/apps/khinsider/
+        while read -r line; do
+            if [[ "$line" != "" && "$line" != \#* ]]; then
+                python khinsider.py --format flac "$line"
+            fi
+        done <~/Library/scripts/music.txt
         cd ~
         valid_flag=true
         ;;
@@ -142,6 +167,106 @@ for arg in "$@"; do
         ln -s /mnt/veracrypt1/AI/stable-diffusion-webui/outputs ~/Library/AI/stable-diffusion-webui/outputs
         ln -s /mnt/veracrypt1/AI/ComfyUI/output ~/Library/AI/ComfyUI/output
         echo OK
+        valid_flag=true
+        ;;
+    bt)
+        bluetoothctl connect 90:62:3F:97:DC:C1
+        valid_flag=true
+        ;;
+    sensor)
+        stty -F /dev/ttyACM0 9600 raw
+        count=0
+        cat /dev/ttyACM0 | while read -n1 char; do
+            if [ "$char" = "o" ]; then
+                count=$((count + 1))
+                [ "$count" -eq 1 ] && continue
+                echo "Detected 'o'"
+                playerctl pause
+            fi
+        done
+        valid_flag=true
+        ;;
+    waydroid-start)
+        waydroid prop set persist.waydroid.width 1080  # you must run this in terminal while waydroid is running
+        waydroid prop set persist.waydroid.height 1920 # you must run this in terminal while waydroid is running
+        waydroid session stop
+        echo "About to launch full ui... (3 secs waiting)"
+        sleep 3
+        waydroid prop set persist.waydroid.width 1080
+        waydroid prop set persist.waydroid.height 1920
+        sleep 1
+        waydroid show-full-ui &
+        sleep 1
+        waydroid prop set persist.waydroid.width 1080
+        waydroid prop set persist.waydroid.height 1920
+        sleep 1
+
+        valid_flag=true
+        ;;
+    waydroid-stop)
+        waydroid session stop
+        valid_flag=true
+        ;;
+    droid-1)
+        pkill scrcpy
+        adb shell wm density 320
+        # adb shell wm size 1920x1080
+        # adb shell settings put system screen_brightness 1
+        scrcpy --video-codec=h265 --video-bit-rate=24M --max-fps=60 --stay-awake &
+        # scrcpy --video-codec=h265 --video-bit-rate=24M --max-fps=144 --turn-screen-off --stay-awake &
+        # https://github.com/Genymobile/scrcpy/blob/master/doc/device.md
+        valid_flag=true
+        ;;
+    droid-0)
+        pkill scrcpy
+        adb shell wm density reset
+        adb shell wm size reset
+        adb shell settings put system screen_brightness 50
+        valid_flag=true
+        ;;
+    rc-bose)
+        dunstify 'Disconnect'
+        bluetoothctl disconnect AC:BF:71:91:31:D5
+        sleep 5
+        dunstify 'Re-Connect'
+        bluetoothctl connect AC:BF:71:91:31:D5
+        sleep 5
+        dunstify 'OK'
+        pactl set-sink-volume @DEFAULT_SINK@ 50%
+        valid_flag=true
+        ;;
+    bose-fix)
+        while true; do
+            if bluetoothctl info "AC:BF:71:91:31:D5" | grep -q "Connected: yes"; then
+                pkill play
+                VOLUME=$(pactl get-sink-volume @DEFAULT_SINK@ | awk '{print $5}' | tr -d '%')
+
+                if [ "$VOLUME" -ge 75 ]; then
+                    play -n synth whitenoise vol 0.0003 remix 1 0 &
+                elif [ "$VOLUME" -ge 50 ]; then
+                    play -n synth whitenoise vol 0.0006 remix 1 0 &
+                elif [ "$VOLUME" -ge 25 ]; then
+                    play -n synth whitenoise vol 0.0009 remix 1 0 &
+                fi
+            else
+                pkill play
+            fi
+            sleep 60
+        done
+
+        valid_flag=true
+        ;;
+    ev)
+        # cmd ev '/run/media/Z/E7FF-F652/Library/motorola edge 30 ultra/DCIM/QuickVideoRecorder/QVR_2025_02_06_14_19_22.mp4' '/home/Z/Library/test/b'
+        ffmpeg -i "$2" -qscale:v 2 "$3/output_%03d.jpg"
+        valid_flag=true
+        ;;
+    eth-up)
+        sudo ip link set enp14s0 up
+        valid_flag=true
+        ;;
+    eth-down)
+        sudo ip link set enp14s0 down
         valid_flag=true
         ;;
     *) ;;

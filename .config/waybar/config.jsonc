@@ -1,0 +1,109 @@
+{
+  "layer": "top",
+  "position": "top",
+  "spacing": 5,
+  "output": ["DP-2"],
+  "reload_style_on_change": true,
+  "modules-left": ["cpu", "memory", "network", "custom/gpu-usage"],
+  "modules-center": ["wlr/taskbar", "clock", "hyprland/workspaces"],
+  "modules-right": ["wireplumber", "tray"],
+  "wlr/taskbar": {
+    "format": "{icon}",
+    "icon-size": 14,
+    "icon-theme": "Numix-Circle",
+    "tooltip-format": "{title}",
+    "on-click": "activate",
+    "on-click-middle": "close",
+    "ignore-list": ["Alacritty"],
+    "app_ids-mapping": {
+      "firefoxdeveloperedition": "firefox-developer-edition"
+    },
+    "rewrite": {
+      "Firefox Web Browser": "Firefox",
+      "Foot Server": "Terminal"
+    }
+  },
+  "wireplumber": {
+    "format": "<span foreground='#829181'>VOL </span> {volume}%",
+    "format-muted": "",
+    "on-click": "pavucontrol",
+    "format-icons": ["", "", ""]
+  },
+  "hyprland/workspaces": {
+    "format": "{icon}",
+    "format-icons": {
+      "1": "一",
+      "2": "二",
+      "3": "三",
+      "4": "四",
+      "5": "五",
+      "6": "六",
+      "7": "七",
+      "8": "八",
+      "9": "九",
+      "10": "十",
+
+      "11": "一",
+      "12": "二",
+      "13": "三",
+      "14": "四",
+      "15": "五",
+      "16": "六",
+      "17": "七",
+      "18": "八",
+      "19": "九",
+      "20": "十",
+
+      "21": "一",
+      "22": "二",
+      "23": "三",
+      "24": "四",
+      "25": "五",
+      "26": "六",
+      "27": "七",
+      "28": "八",
+      "29": "九",
+      "30": "十"
+    }
+  },
+  "tray": {
+    "spacing": 10
+  },
+  "clock": {
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+    "format-alt": "{:%Y-%m-%d}"
+  },
+  "cpu": {
+    "states": {
+      "warning": 75,
+      "critical": 90
+    },
+    "format": "<span foreground='#829181'>CPU </span> {usage}%",
+    "tooltip": false
+  },
+  "memory": {
+    "states": {
+      "warning": 75,
+      "critical": 95
+    },
+    "format": "<span foreground='#829181'>MEM </span> {}%"
+  },
+  "custom/gpu-usage": {
+    "format": "<span foreground='#829181'>GPU </span> {}",
+    "exec": "gpu-usage-waybar",
+    "return-type": "json",
+    "format-icons": "󰾲",
+    "on-click": "alacritty nvtop"
+  },
+  "network": {
+    "interval": 2,
+    "interface": "enp14s0",
+    "max-length": 50,
+    "format": "",
+    "format-ethernet": "<span foreground='#829181'>ETH </span>↓ {bandwidthDownBits} <span foreground='#829181'>-</span> ↑ {bandwidthUpBits}",
+    "format-disconnected": "ETHERNET NOT CONNECTED",
+    "tooltip-format": "",
+    "tooltip-format-ethernet": "Ifname:\t{ifname}\nNMask:\t{netmask}\nDown:\t{bandwidthDownBits}\nUp:\t{bandwidthUpBits}",
+    "tooltip-format-disconnected": ""
+  }
+}
